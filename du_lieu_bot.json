@@ -1,0 +1,80 @@
+{
+    "settings": {
+        "hotkey": "F9",
+        "enable_file_log": true,
+        "loop_delay": 20.0
+    },
+    "action_pool": [
+        {
+            "id": "A_1782634993364",
+            "name": "ủy thác",
+            "image": "thu_muc_anh_nhan_dien\\act_A_1782634993364.jpg",
+            "action": "Click",
+            "wait_infinite": true,
+            "timeout": 2.0
+        },
+        {
+            "id": "A_1782635362762",
+            "name": "ấn tắt kho",
+            "image": "thu_muc_anh_nhan_dien\\act_A_1782635362762.jpg",
+            "action": "Click",
+            "wait_infinite": true,
+            "timeout": 2.0
+        },
+        {
+            "id": "A_1782635810874",
+            "name": "ấn mở kho",
+            "image": "thu_muc_anh_nhan_dien\\act_A_1782635810874.jpg",
+            "action": "Click",
+            "wait_infinite": true,
+            "timeout": 2.0
+        },
+        {
+            "id": "A_1782636273727",
+            "name": "hủy ủy thác",
+            "image": "thu_muc_anh_nhan_dien\\act_A_1782636273727.jpg",
+            "action": "Click",
+            "wait_infinite": true,
+            "timeout": 2.0
+        }
+    ],
+    "workflow": [
+        {
+            "row_id": "R_1782575906621",
+            "row_name": "Dòng 1",
+            "timeout": 10.0,
+            "actions": [
+                "A_1782634883385",
+                "A_1782634993364"
+            ],
+            "delay": 0.0
+        },
+        {
+            "row_id": "R_1782635326740",
+            "row_name": "Dòng 2",
+            "delay": 15.0,
+            "timeout": 10.0,
+            "actions": [
+                "A_1782635810874"
+            ]
+        },
+        {
+            "row_id": "R_1782635606007",
+            "row_name": "Dòng 3",
+            "delay": 6.0,
+            "timeout": 10.0,
+            "actions": [
+                "A_1782635362762"
+            ]
+        },
+        {
+            "row_id": "R_1782636308788",
+            "row_name": "Dòng 4",
+            "delay": 25.0,
+            "timeout": 10.0,
+            "actions": [
+                "A_1782636273727"
+            ]
+        }
+    ]
+}
