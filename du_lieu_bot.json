@@ -36,44 +36,41 @@
             "action": "Click",
             "wait_infinite": true,
             "timeout": 2.0
+        },
+        {
+            "id": "A_1782639205410",
+            "name": "test- double click url",
+            "image": "thu_muc_anh_nhan_dien\\act_A_1782639205410.jpg",
+            "action": "Double Click",
+            "wait_infinite": true,
+            "timeout": 2.0
+        },
+        {
+            "id": "A_1782639250880",
+            "name": "test - simple click url",
+            "image": "thu_muc_anh_nhan_dien\\act_A_1782639250880.jpg",
+            "action": "Click",
+            "wait_infinite": true,
+            "timeout": 2.0
         }
     ],
     "workflow": [
         {
-            "row_id": "R_1782575906621",
+            "row_id": "R_1782639208307",
             "row_name": "Dòng 1",
-            "timeout": 10.0,
+            "delay": 0.0,
+            "timeout": 0.0,
             "actions": [
-                "A_1782634883385",
-                "A_1782634993364"
-            ],
-            "delay": 0.0
+                "A_1782639250880"
+            ]
         },
         {
-            "row_id": "R_1782635326740",
+            "row_id": "R_1782639264796",
             "row_name": "Dòng 2",
-            "delay": 15.0,
-            "timeout": 10.0,
+            "delay": 1.0,
+            "timeout": 0.0,
             "actions": [
-                "A_1782635810874"
-            ]
-        },
-        {
-            "row_id": "R_1782635606007",
-            "row_name": "Dòng 3",
-            "delay": 6.0,
-            "timeout": 10.0,
-            "actions": [
-                "A_1782635362762"
-            ]
-        },
-        {
-            "row_id": "R_1782636308788",
-            "row_name": "Dòng 4",
-            "delay": 25.0,
-            "timeout": 10.0,
-            "actions": [
-                "A_1782636273727"
+                "A_1782639205410"
             ]
         }
     ]

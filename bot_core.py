@@ -66,7 +66,6 @@ class BotLogic:
                 time.sleep(2)
                 continue
 
-            # BĂNG CHUYỀN CHẠY TỪ DÒNG 1 -> DÒNG CUỐI (100% Tuần Tự)
             for row in workflow:
                 if not self.is_running: break
                 
@@ -76,16 +75,14 @@ class BotLogic:
                 
                 self.log_message(f"--- CHUẨN BỊ BƯỚC VÀO: {row_name} ---", "green", "INFO")
                 
-                # 1. THỰC HIỆN DELAY CHỜ VÀO DÒNG
                 if row_delay > 0:
                     self.log_message(f"Đợi {row_delay}s trước khi bắt đầu dòng này...", "orange", "INFO")
                     wait_start = time.time()
                     while self.is_running and (time.time() - wait_start) < row_delay:
-                        time.sleep(0.1) # Check liên tục để không bị kẹt khi user bấm Stop
+                        time.sleep(0.1) 
                 
                 if not self.is_running: break
                 
-                # Nạp các hành động của dòng này
                 current_actions = []
                 for act_id in row.get("actions", []):
                     act = self._get_action_from_pool(act_id, action_pool)
@@ -94,7 +91,6 @@ class BotLogic:
 
                 row_start_time = time.time()
 
-                # 2. CHẠY TUẦN TỰ TỪNG HÀNH ĐỘNG TRONG DÒNG
                 for act in current_actions:
                     if not self.is_running: break
                     
@@ -103,7 +99,6 @@ class BotLogic:
                     act_timeout = float(act.get("timeout", 2.0))
                     
                     while self.is_running:
-                        # Check Timeout của Dòng trước tiên
                         if row_timeout > 0 and (time.time() - row_start_time) >= row_timeout:
                             self.log_message(f"{row_name}: Hết {row_timeout}s Timeout Dòng -> Ép thoát!", "orange", "WARNING")
                             break 
@@ -111,12 +106,16 @@ class BotLogic:
                         pos = vision.find_template_on_screen(act["image"], threshold=0.8)
                         if pos:
                             x, y = pos
-                            actions.click_at(x, y)
-                            self.log_message(f"Hoàn thành '{act['name']}'", "blue", "ACTION")
-                            time.sleep(0.5) # Nghỉ cơ bản 0.5s sau khi click
-                            break # Xong ô này, qua ô kế tiếp
+                            action_type = act.get("action", "Click")
+                            if action_type == "Double Click":
+                                actions.double_click_at(x, y)
+                            else:
+                                actions.click_at(x, y)
+                                
+                            self.log_message(f"Hoàn thành '{act['name']}' ({action_type})", "blue", "ACTION")
+                            time.sleep(0.5) 
+                            break 
                         else:
-                            # Xử lý Bỏ qua (Skip) của riêng ô này
                             if not wait_infinite:
                                 if (time.time() - act_start_time) >= act_timeout:
                                     self.log_message(f"Không thấy '{act['name']}' sau {act_timeout}s -> SKIP", "orange", "WARNING")
@@ -124,13 +123,17 @@ class BotLogic:
                             
                             time.sleep(0.5) 
                             
-                    # Nếu nguyên nhân văng khỏi vòng lặp là do Hết giờ Dòng, thì ngắt luôn cả luồng hành động
                     if row_timeout > 0 and (time.time() - row_start_time) >= row_timeout:
                         break
 
-            # Hết 1 vòng kịch bản (đã chạy xong dòng cuối cùng)
+            # -----------------------------------------------------
+            # VÁ LỖI NGHỈ TOÀN CỤC (Thay thế time.sleep cứng bằng Timer)
+            # -----------------------------------------------------
             if self.is_running:
                 self.log_message(f"Đã xong 1 vòng. Đứng nghỉ {loop_delay}s trước khi lặp lại...", "green", "INFO")
-                time.sleep(loop_delay)
+                loop_wait_start = time.time()
+                # Bot sẽ kiên nhẫn đứng đợi, đếm ngược từng 0.1s đến khi đủ số giây loop_delay
+                while self.is_running and (time.time() - loop_wait_start) < loop_delay:
+                    time.sleep(0.1)
                 
         self.log_message("=== BOT ĐÃ DỪNG HOÀN TOÀN ===", "gray", "INFO")

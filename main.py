@@ -1,14 +1,10 @@
 import ctypes
-
-# Bắt buộc Windows trả về tọa độ pixel thực tế (Fix lệch chuột do Scale 125%, 150%)
 try:
-    ctypes.windll.shcore.SetProcessDpiAwareness(2) # PROCESS_PER_MONITOR_DPI_AWARE
+    ctypes.windll.shcore.SetProcessDpiAwareness(2)
 except Exception:
-    try:
-        ctypes.windll.user32.SetProcessDPIAware()
-    except Exception:
-        pass
-        
+    try: ctypes.windll.user32.SetProcessDPIAware()
+    except Exception: pass
+
 import customtkinter as ctk
 import keyboard
 import os
@@ -88,7 +84,6 @@ class GameBotApp(ctk.CTk):
                 if "global_cooldown" in data["settings"]:
                     data["settings"]["loop_delay"] = data["settings"].pop("global_cooldown")
                     
-                # Dọn dẹp dữ liệu cũ (Xóa mode, Thêm delay)
                 for row in data.get("workflow", []):
                     if "mode" in row: del row["mode"]
                     if "delay" not in row: row["delay"] = 0.0
@@ -98,6 +93,8 @@ class GameBotApp(ctk.CTk):
                     if os.path.exists(act.get("image", "")):
                         if "wait_infinite" not in act: act["wait_infinite"] = True
                         if "timeout" not in act: act["timeout"] = 2.0
+                        # Khởi tạo mặc định nếu hành động cũ chưa có action type
+                        if "action" not in act: act["action"] = "Click"
                         valid_pool.append(act)
                         
                 data["action_pool"] = valid_pool
@@ -180,13 +177,19 @@ class GameBotApp(ctk.CTk):
     def open_add_action_dialog(self):
         dialog = ctk.CTkToplevel(self)
         dialog.title("Tạo Hành Động Mới")
-        dialog.geometry("350x380")
+        # Thay đổi chiều cao từ 380 lên 420 để chứa nút mới
+        dialog.geometry("350x420")
         dialog.attributes("-topmost", True)
         dialog.resizable(False, False)
 
         ctk.CTkLabel(dialog, text="Tên nhận diện (VD: Nút Bắt Đầu):").pack(pady=(15,0))
         name_entry = ctk.CTkEntry(dialog, width=220)
         name_entry.pack(pady=5)
+
+        # Giao diện thả xuống mới
+        ctk.CTkLabel(dialog, text="Loại thao tác:").pack(pady=(10,0))
+        action_type_var = ctk.StringVar(value="Click")
+        ctk.CTkOptionMenu(dialog, values=["Click", "Double Click"], variable=action_type_var, width=220).pack(pady=5)
 
         ctk.CTkLabel(dialog, text="(Mặc định Hành động sẽ Chờ Vô Hạn)\nBạn có thể chỉnh lại ở ngoài Kho sau.", text_color="gray").pack(pady=(10,0))
 
@@ -213,14 +216,18 @@ class GameBotApp(ctk.CTk):
             shutil.copy(self.temp_image_path, saved_path)
 
             self.app_data["action_pool"].append({
-                "id": act_id, "name": name, "image": saved_path, "action": "Click", 
-                "wait_infinite": True, "timeout": 2.0
+                "id": act_id, 
+                "name": name, 
+                "image": saved_path, 
+                "action": action_type_var.get(), # Lưu loại Click vào JSON
+                "wait_infinite": True, 
+                "timeout": 2.0
             })
             self.save_data()
             self.render_action_pool()
             dialog.destroy()
 
-        ctk.CTkButton(dialog, text="Lưu Lại", command=save_action).pack(pady=20)
+        ctk.CTkButton(dialog, text="Lưu Lại", command=save_action).pack(pady=15)
 
     def delete_action_from_pool(self, act_id):
         for act in self.app_data["action_pool"]:
