@@ -24,14 +24,15 @@ class GameBotApp(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        self.title("Game Auto Bot - V7.3 (Pure Sequence)")
+        self.title("Game Auto Bot - V7.4 (Dashboard Pro)")
         self.geometry("1100x700") 
         self.resizable(False, False)
 
         if not os.path.exists(IMAGE_DIR):
             os.makedirs(IMAGE_DIR)
 
-        self.bot = BotLogic(status_callback=self.update_status_label)
+        # Trỏ callback về hàm vẽ Dashboard mới
+        self.bot = BotLogic(dashboard_callback=self.update_dashboard)
         self.vcmd = (self.register(self.validate_number_input), '%P')
 
         self.app_data = self.load_data()
@@ -93,7 +94,6 @@ class GameBotApp(ctk.CTk):
                     if os.path.exists(act.get("image", "")):
                         if "wait_infinite" not in act: act["wait_infinite"] = True
                         if "timeout" not in act: act["timeout"] = 2.0
-                        # Khởi tạo mặc định nếu hành động cũ chưa có action type
                         if "action" not in act: act["action"] = "Click"
                         valid_pool.append(act)
                         
@@ -177,7 +177,6 @@ class GameBotApp(ctk.CTk):
     def open_add_action_dialog(self):
         dialog = ctk.CTkToplevel(self)
         dialog.title("Tạo Hành Động Mới")
-        # Thay đổi chiều cao từ 380 lên 420 để chứa nút mới
         dialog.geometry("350x420")
         dialog.attributes("-topmost", True)
         dialog.resizable(False, False)
@@ -186,7 +185,6 @@ class GameBotApp(ctk.CTk):
         name_entry = ctk.CTkEntry(dialog, width=220)
         name_entry.pack(pady=5)
 
-        # Giao diện thả xuống mới
         ctk.CTkLabel(dialog, text="Loại thao tác:").pack(pady=(10,0))
         action_type_var = ctk.StringVar(value="Click")
         ctk.CTkOptionMenu(dialog, values=["Click", "Double Click"], variable=action_type_var, width=220).pack(pady=5)
@@ -219,7 +217,7 @@ class GameBotApp(ctk.CTk):
                 "id": act_id, 
                 "name": name, 
                 "image": saved_path, 
-                "action": action_type_var.get(), # Lưu loại Click vào JSON
+                "action": action_type_var.get(), 
                 "wait_infinite": True, 
                 "timeout": 2.0
             })
@@ -298,14 +296,12 @@ class GameBotApp(ctk.CTk):
             name_entry.pack(side="left")
             name_entry.bind("<FocusOut>", lambda e, r=row, ent=name_entry: self._update_row_val(r, "row_name", ent.get()))
 
-            # Cài đặt Delay Dòng
             ctk.CTkLabel(header, text="Delay vào (s):").pack(side="left", padx=(15, 2))
             dl_entry = ctk.CTkEntry(header, width=45, validate="key", validatecommand=self.vcmd)
             dl_entry.insert(0, str(row.get("delay", 0.0)))
             dl_entry.pack(side="left")
             dl_entry.bind("<FocusOut>", lambda e, r=row, ent=dl_entry: self._update_row_val(r, "delay", ent.get()))
 
-            # Cài đặt Timeout Dòng
             ctk.CTkLabel(header, text="Timeout Dòng (s):").pack(side="left", padx=(15, 2))
             to_entry = ctk.CTkEntry(header, width=45, validate="key", validatecommand=self.vcmd)
             to_entry.insert(0, str(row.get("timeout", 0.0)))
@@ -360,7 +356,7 @@ class GameBotApp(ctk.CTk):
         self.render_workflow()
 
     # ==========================================
-    # KHUNG BÊN DƯỚI: CÀI ĐẶT
+    # KHUNG BÊN DƯỚI: CÀI ĐẶT & DASHBOARD
     # ==========================================
     def setup_bottom_panel(self):
         set_frame = ctk.CTkFrame(self.bottom_frame, fg_color="transparent")
@@ -380,10 +376,30 @@ class GameBotApp(ctk.CTk):
         self.hotkey_entry.bind("<Return>", lambda e: self.update_hotkey())
 
         ctrl_frame = ctk.CTkFrame(self.bottom_frame, fg_color="transparent")
-        ctrl_frame.pack(side="right", fill="y", pady=10, padx=10)
+        ctrl_frame.pack(side="right", fill="y", pady=5, padx=10)
 
-        self.status_label = ctk.CTkLabel(ctrl_frame, text="Trạng thái: Sẵn sàng", text_color="gray", font=ctk.CTkFont(size=14, weight="bold"))
-        self.status_label.pack(side="top", pady=(0, 5))
+        # ----------------------------------------------------
+        # BẢNG ĐIỀU KHIỂN (DASHBOARD) 4 DÒNG CỐ ĐỊNH
+        # ----------------------------------------------------
+        self.dash_frame = ctk.CTkFrame(ctrl_frame, width=320, height=115, fg_color="gray15", corner_radius=8, border_width=1, border_color="gray30")
+        self.dash_frame.pack_propagate(False) # Chống co giãn khung
+        self.dash_frame.pack(side="top", pady=(0, 5))
+
+        font_bold = ctk.CTkFont(weight="bold", size=12)
+        font_mono = ctk.CTkFont(family="Consolas", size=13, weight="bold") # Font chống nhảy chữ khi số chạy
+
+        self.lbl_status = ctk.CTkLabel(self.dash_frame, text="Trạng thái: 🔴 Đã dừng", anchor="w", font=font_bold, text_color="gray")
+        self.lbl_status.pack(fill="x", padx=10, pady=(5, 0))
+
+        self.lbl_stage = ctk.CTkLabel(self.dash_frame, text="Giai đoạn: -", anchor="w", font=font_bold)
+        self.lbl_stage.pack(fill="x", padx=10, pady=(2, 0))
+
+        self.lbl_action = ctk.CTkLabel(self.dash_frame, text="Hành động: -", anchor="w", font=font_bold)
+        self.lbl_action.pack(fill="x", padx=10, pady=(2, 0))
+
+        self.lbl_countdown = ctk.CTkLabel(self.dash_frame, text="Đếm ngược: -", anchor="w", font=font_mono, text_color="gold")
+        self.lbl_countdown.pack(fill="x", padx=10, pady=(2, 5))
+        # ----------------------------------------------------
 
         btn_row = ctk.CTkFrame(ctrl_frame, fg_color="transparent")
         btn_row.pack(side="bottom")
@@ -411,13 +427,20 @@ class GameBotApp(ctk.CTk):
             self.app_data["settings"]["hotkey"] = new_hk
             self.save_data()
             self.start_button.configure(text=f"START ({self.current_hotkey})")
-            self.update_status_label(f"Đã đổi phím: {new_hk}", "green")
+            # Cập nhật tạm thời lên dashboard khi đổi phím
+            self.update_dashboard("🟢 Đã đổi phím", f"Phím mới: {new_hk}", "-", "-", "green")
         except ValueError:
-            self.update_status_label("Phím lỗi!", "red")
+            self.update_dashboard("🔴 Phím lỗi", "Không thể gán phím này", "-", "-", "red")
             keyboard.add_hotkey(self.current_hotkey, self.toggle_bot)
 
-    def update_status_label(self, message, color):
-        self.after(0, lambda: self.status_label.configure(text=f"Trạng thái: {message}", text_color=color))
+    def update_dashboard(self, status, stage, action, countdown, color):
+        """Hàm nhận tín hiệu từ bot_core và vẽ lại bảng điều khiển (Chống xung đột Thread)"""
+        def _update():
+            self.lbl_status.configure(text=f"Trạng thái: {status}", text_color=color)
+            self.lbl_stage.configure(text=f"Giai đoạn: {stage}")
+            self.lbl_action.configure(text=f"Hành động: {action}")
+            self.lbl_countdown.configure(text=f"Đếm ngược: {countdown}")
+        self.after(0, _update)
 
     def toggle_bot(self):
         if not self.bot.is_running: self.after(0, self.on_start)
@@ -428,7 +451,7 @@ class GameBotApp(ctk.CTk):
         self.update_settings()
         
         if not self.app_data.get("workflow"):
-            self.update_status_label("Cột phải trống! Hãy thêm Dòng chảy.", "red")
+            self.update_dashboard("🔴 Lỗi", "Dòng chảy trống!", "Hãy thêm Dòng ở cột phải", "-", "red")
             return
 
         self.start_button.configure(state="disabled")

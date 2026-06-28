@@ -759,3 +759,23 @@
 [16:39:20.193] [INFO] Đã xong 1 vòng. Đứng nghỉ 20.0s trước khi lặp lại...
 [16:39:22.445] [INFO] Đang dừng bot...
 [16:39:22.503] [INFO] === BOT ĐÃ DỪNG HOÀN TOÀN ===
+[16:49:11.533] [INFO] === BẮT ĐẦU CHẠY BOT ===
+[16:49:11.533] [INFO] --- BƯỚC VÀO: Dòng 1 ---
+[16:49:12.283] [INFO] > Hoàn thành 'test - simple click url' (Click)
+[16:49:12.785] [INFO] --- BƯỚC VÀO: Dòng 2 ---
+[16:49:22.549] [INFO] > Hoàn thành 'test- double click url' (Double Click)
+[16:49:23.052] [INFO] Đã xong 1 vòng. Nghỉ 20.0s...
+[16:49:33.969] [INFO] Đang dừng bot...
+[16:49:34.071] [INFO] === BOT ĐÃ DỪNG HOÀN TOÀN ===
+[16:56:40.697] [INFO] === BẮT ĐẦU CHẠY BOT ===
+[16:56:40.697] [INFO] --- BƯỚC VÀO: Dòng 1 ---
+[16:56:41.592] [INFO] > Hoàn thành '1_zp_đúp' (Double Click)
+[16:56:42.094] [INFO] Đã xong 1 vòng. Nghỉ 20.0s...
+[16:56:52.606] [INFO] Đang dừng bot...
+[16:56:52.668] [INFO] === BOT ĐÃ DỪNG HOÀN TOÀN ===
+[16:59:33.379] [INFO] === BẮT ĐẦU CHẠY BOT ===
+[16:59:33.380] [INFO] --- BƯỚC VÀO: Dòng 1 ---
+[16:59:34.304] [INFO] > Hoàn thành '2_zs_start_game' (Click)
+[16:59:34.806] [INFO] --- BƯỚC VÀO: Dòng 2 ---
+[16:59:47.275] [INFO] Đang dừng bot...
+[16:59:47.327] [INFO] === BOT ĐÃ DỪNG HOÀN TOÀN ===

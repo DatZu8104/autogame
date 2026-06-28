@@ -38,17 +38,17 @@
             "timeout": 2.0
         },
         {
-            "id": "A_1782639205410",
-            "name": "test- double click url",
-            "image": "thu_muc_anh_nhan_dien\\act_A_1782639205410.jpg",
+            "id": "A_1782640591247",
+            "name": "1_zp_đúp",
+            "image": "thu_muc_anh_nhan_dien\\act_A_1782640591247.jpg",
             "action": "Double Click",
             "wait_infinite": true,
             "timeout": 2.0
         },
         {
-            "id": "A_1782639250880",
-            "name": "test - simple click url",
-            "image": "thu_muc_anh_nhan_dien\\act_A_1782639250880.jpg",
+            "id": "A_1782640763252",
+            "name": "2_zs_start_game",
+            "image": "thu_muc_anh_nhan_dien\\act_A_1782640763252.jpg",
             "action": "Click",
             "wait_infinite": true,
             "timeout": 2.0
@@ -56,21 +56,21 @@
     ],
     "workflow": [
         {
-            "row_id": "R_1782639208307",
+            "row_id": "R_1782640594684",
             "row_name": "Dòng 1",
             "delay": 0.0,
             "timeout": 0.0,
             "actions": [
-                "A_1782639250880"
+                "A_1782640591247"
             ]
         },
         {
-            "row_id": "R_1782639264796",
+            "row_id": "R_1782640617381",
             "row_name": "Dòng 2",
-            "delay": 1.0,
+            "delay": 240.0,
             "timeout": 0.0,
             "actions": [
-                "A_1782639205410"
+                "A_1782640763252"
             ]
         }
     ]
