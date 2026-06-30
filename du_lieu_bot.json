@@ -46,9 +46,27 @@
             "timeout": 2.0
         },
         {
-            "id": "A_1782640763252",
-            "name": "2_zs_start_game",
-            "image": "thu_muc_anh_nhan_dien\\act_A_1782640763252.jpg",
+            "id": "A_1782642513339",
+            "type": "image",
+            "name": "2_start_game",
+            "image": "thu_muc_anh_nhan_dien\\act_A_1782642513339.jpg",
+            "action": "Click",
+            "wait_infinite": true,
+            "timeout": 2.0
+        },
+        {
+            "id": "A_1782642690537",
+            "type": "coordinate",
+            "name": "3_click trang viên",
+            "x": 1655,
+            "y": 820,
+            "action": "Click"
+        },
+        {
+            "id": "A_1782712451869",
+            "type": "image",
+            "name": "dinh thị bích",
+            "image": "thu_muc_anh_nhan_dien\\act_A_1782712451869.jpg",
             "action": "Click",
             "wait_infinite": true,
             "timeout": 2.0
@@ -59,18 +77,18 @@
             "row_id": "R_1782640594684",
             "row_name": "Dòng 1",
             "delay": 0.0,
-            "timeout": 0.0,
+            "timeout": 5.0,
             "actions": [
-                "A_1782640591247"
+                "A_1782712451869"
             ]
         },
         {
-            "row_id": "R_1782640617381",
+            "row_id": "R_1782712353020",
             "row_name": "Dòng 2",
-            "delay": 240.0,
-            "timeout": 0.0,
+            "delay": 1.0,
+            "timeout": 60.0,
             "actions": [
-                "A_1782640763252"
+                "A_1782634993364"
             ]
         }
     ]

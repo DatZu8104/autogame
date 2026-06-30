@@ -23,7 +23,6 @@ class BotLogic:
         self.app_data = {}
         self.data_lock = threading.Lock() 
 
-        # 4 Biến trạng thái để vẽ lên Dashboard
         self.state_status = "🔴 Đã dừng"
         self.state_stage = "-"
         self.state_action = "-"
@@ -35,18 +34,13 @@ class BotLogic:
             self.app_data = data
 
     def _update_ui(self):
-        """Bắn tín hiệu làm mới bảng điều khiển lên main.py"""
         if self.update_dashboard:
             self.update_dashboard(
-                self.state_status, 
-                self.state_stage, 
-                self.state_action, 
-                self.state_countdown, 
-                self.state_color
+                self.state_status, self.state_stage, 
+                self.state_action, self.state_countdown, self.state_color
             )
 
     def log_message(self, message, level="INFO"):
-        """Chỉ dùng để ghi file Hộp đen (Không đụng tới giao diện nữa)"""
         if level == "INFO": logging.info(message)
         elif level == "WARNING": logging.warning(message)
         elif level == "ERROR": logging.error(message)
@@ -107,7 +101,6 @@ class BotLogic:
                 self.state_countdown = "-"
                 self._update_ui()
                 
-                # 1. ĐẾM NGƯỢC DELAY VÀO DÒNG
                 if row_delay > 0:
                     self.state_action = "💤 Đợi vào Dòng..."
                     wait_start = time.time()
@@ -121,21 +114,48 @@ class BotLogic:
                 current_actions = []
                 for act_id in row.get("actions", []):
                     act = self._get_action_from_pool(act_id, action_pool)
-                    if act and os.path.exists(act["image"]): 
-                        current_actions.append(act)
+                    # Sửa lại: Nếu là tọa độ thì không cần check os.path.exists(ảnh)
+                    if act:
+                        if act.get("type") == "coordinate" or os.path.exists(act.get("image", "")):
+                            current_actions.append(act)
 
                 row_start_time = time.time()
 
                 for act in current_actions:
                     if not self.is_running: break
                     
+                    act_type = act.get("type", "image")
+                    action_click_type = act.get("action", "Click")
+                    short_act = act['name'] if len(act['name']) <= 18 else act['name'][:15] + "..."
+                    
+                    # ==========================================
+                    # NHÁNH 1: HÀNH ĐỘNG TỌA ĐỘ
+                    # ==========================================
+                    if act_type == "coordinate":
+                        x, y = int(act.get("x", 0)), int(act.get("y", 0))
+                        self.state_action = f"🎯 Click điểm: X:{x} Y:{y}"
+                        self.state_countdown = "✅ Xong"
+                        self._update_ui()
+                        
+                        if action_click_type == "Double Click": actions.double_click_at(x, y)
+                        else: actions.click_at(x, y)
+                            
+                        self.log_message(f"Click Tọa độ '{act['name']}' ({action_click_type})", "ACTION")
+                        
+                        w_start = time.time()
+                        while self.is_running and (time.time() - w_start) < 0.5:
+                            time.sleep(0.1)
+                            
+                        continue # Bỏ qua phần dưới, lập tức nhảy sang Action tiếp theo
+                    
+                    # ==========================================
+                    # NHÁNH 2: HÀNH ĐỘNG TÌM ẢNH (Logic cũ)
+                    # ==========================================
                     act_start_time = time.time()
                     wait_infinite = act.get("wait_infinite", True)
                     act_timeout = float(act.get("timeout", 2.0))
-                    short_act = act['name'] if len(act['name']) <= 18 else act['name'][:15] + "..."
                     
                     while self.is_running:
-                        # 2. KIỂM TRA ĐẾM NGƯỢC THỜI GIAN
                         if not wait_infinite:
                             self.state_countdown = f"⏩ Skip bước: {(time.time() - act_start_time):.1f}s / {act_timeout:.1f}s"
                         elif row_timeout > 0:
@@ -146,39 +166,33 @@ class BotLogic:
                         self.state_action = f"🔍 Đang quét: [{short_act}]"
                         self._update_ui()
 
-                        # Check Timeout của Dòng trước tiên
                         if row_timeout > 0 and (time.time() - row_start_time) >= row_timeout:
                             self.log_message(f"Hết {row_timeout}s Timeout Dòng -> Ép thoát!", "WARNING")
                             break 
                             
-                        # QUÉT ẢNH
                         pos = vision.find_template_on_screen(act["image"], threshold=0.8)
                         if pos:
                             x, y = pos
-                            action_type = act.get("action", "Click")
                             
                             self.state_action = f"🖱️ Đã nhấn: [{short_act}]"
                             self.state_countdown = "✅ Hoàn thành"
                             self._update_ui()
 
-                            if action_type == "Double Click": actions.double_click_at(x, y)
+                            if action_click_type == "Double Click": actions.double_click_at(x, y)
                             else: actions.click_at(x, y)
                                 
-                            self.log_message(f"Hoàn thành '{act['name']}' ({action_type})", "ACTION")
+                            self.log_message(f"Nhận diện '{act['name']}' ({action_click_type})", "ACTION")
                             
-                            # Nghỉ cơ bản 0.5s sau khi click (đếm ngược ngầm)
                             w_start = time.time()
                             while self.is_running and (time.time() - w_start) < 0.5:
                                 time.sleep(0.1)
                             break 
                         else:
-                            # Xử lý Bỏ qua (Skip) của riêng ô này
                             if not wait_infinite:
                                 if (time.time() - act_start_time) >= act_timeout:
-                                    self.log_message(f"Không thấy '{act['name']}' sau {act_timeout}s -> SKIP", "WARNING")
+                                    self.log_message(f"Không thấy '{act['name']}' -> SKIP", "WARNING")
                                     break 
                             
-                            # Cắt nhỏ time.sleep(0.5) thành 5 lần 0.1s để số giây nhảy mượt
                             w_start = time.time()
                             while self.is_running and (time.time() - w_start) < 0.5:
                                 if not wait_infinite:
@@ -191,7 +205,6 @@ class BotLogic:
                     if row_timeout > 0 and (time.time() - row_start_time) >= row_timeout:
                         break
 
-            # 3. ĐẾM NGƯỢC NGHỈ TOÀN CỤC
             if self.is_running:
                 self.log_message(f"Đã xong 1 vòng. Nghỉ {loop_delay}s...", "INFO")
                 self.state_stage = "🔄 Hoàn thành 1 vòng"
